@@ -45,6 +45,13 @@ export default function Dashboard() {
             </div>
           </Link>
           
+          <Link href="/dashboard/products" className="block">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-100 dark:border-yellow-800 hover:bg-yellow-100 dark:hover:bg-yellow-800/30 transition-colors">
+              <h4 className="font-bold">Product Management</h4>
+              <p className="text-sm mt-2">Manage products, pricing, and inventory</p>
+            </div>
+          </Link>
+          
           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
             <h4 className="font-bold">System Settings</h4>
             <p className="text-sm mt-2">Configure system settings and preferences</p>
