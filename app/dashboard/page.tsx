@@ -4,11 +4,17 @@ import { useState, useEffect } from "react";
 import { getCurrentUser } from "@/config/api";
 import Link from "next/link";
 
+interface User {
+  email: string;
+  name?: string;
+  role: string;
+}
+
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    setUser(getCurrentUser());
+    setUser(getCurrentUser() as User);
   }, []);
 
   if (!user) {

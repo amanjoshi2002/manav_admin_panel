@@ -28,6 +28,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">Manav Admin Panel</h1>
+        <p className="text-gray-600">Please login to continue</p>
+      </div>
       <LoginForm />
     </div>
   );

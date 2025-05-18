@@ -9,6 +9,15 @@ interface LoginFormProps {
   onSuccess?: () => void;
 }
 
+interface LoginResponse {
+  token: string;
+  user: {
+    role: string;
+    email: string;
+    name?: string;
+  };
+}
+
 export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +31,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     setLoading(true);
 
     try {
-      const data = await login(email, password);
+      const data = await login(email, password) as LoginResponse;
       
       // Check if user is admin
       if (data.user.role !== "admin") {
