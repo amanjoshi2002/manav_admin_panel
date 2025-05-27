@@ -241,6 +241,23 @@ export default function SubcategoriesPage() {
     }
   };
 
+  // Add this handler for deleting a subcategory
+  const handleDeleteSubcategory = async (subcategoryId: string) => {
+    if (!window.confirm("Are you sure you want to delete this subcategory?")) {
+      return;
+    }
+    try {
+      await authenticatedRequest(`/subcategories/${subcategoryId}`, {
+        method: "DELETE",
+      });
+      setSuccessMessage("Subcategory deleted successfully");
+      fetchSubcategories();
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to delete subcategory");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -366,6 +383,27 @@ export default function SubcategoriesPage() {
               />
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Active
+              </label>
+              <input
+                type="checkbox"
+                name="isActive"
+                checked={!!newSubcategory.isActive}
+                onChange={e =>
+                  setNewSubcategory({
+                    ...newSubcategory,
+                    isActive: e.target.checked,
+                  })
+                }
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                {newSubcategory.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
+            
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -489,6 +527,12 @@ export default function SubcategoriesPage() {
                       className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
                     >
                       Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSubcategory(subcategory._id)}
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                    >
+                      Delete
                     </button>
                   </div>
                 </div>
