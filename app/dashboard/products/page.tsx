@@ -27,7 +27,7 @@ interface Product {
   sizes: string[];
   dynamicFields?: Record<string, any>;
   images: string[];
-  stock: number;
+  isAvailable: boolean; // <-- changed from stock: number
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -177,7 +177,7 @@ export default function ProductsPage() {
                     Price (MRP)
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Stock
+                    Available
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
@@ -216,7 +216,12 @@ export default function ProductsPage() {
                       {product.pricing && product.pricing.mrp ? formatPrice(product.pricing.mrp) : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {product.stock}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${product.isAvailable 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}`}>
+                        {product.isAvailable ? 'Yes' : 'No'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

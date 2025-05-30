@@ -472,6 +472,27 @@ export default function SubcategoriesPage() {
                 />
               </div>
               
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Active
+                </label>
+                <input
+                  type="checkbox"
+                  name="isActive"
+                  checked={!!newSubSubcategory.isActive}
+                  onChange={e =>
+                    setNewSubSubcategory({
+                      ...newSubSubcategory,
+                      isActive: e.target.checked,
+                    })
+                  }
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  {newSubSubcategory.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+              
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"

@@ -57,6 +57,22 @@ export default function Dashboard() {
               <p className="text-sm mt-2">Manage products, pricing, and inventory</p>
             </div>
           </Link>
+
+          {/* PDF Management Section */}
+          <Link href="/dashboard/pdfs" className="block">
+            <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-800/30 transition-colors">
+              <h4 className="font-bold">PDF Management</h4>
+              <p className="text-sm mt-2">Add, update, and delete PDFs</p>
+            </div>
+          </Link>
+
+          {/* Video Management Section */}
+          <Link href="/dashboard/videos" className="block">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition-colors">
+              <h4 className="font-bold">Video Management</h4>
+              <p className="text-sm mt-2">Add, update, and delete videos</p>
+            </div>
+          </Link>
           
           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
             <h4 className="font-bold">System Settings</h4>
