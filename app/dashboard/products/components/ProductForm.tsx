@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { authenticatedRequest } from "@/config/api";
 import { useRouter } from "next/navigation";
 
@@ -62,7 +62,6 @@ interface ProductFormProps {
 
 interface ProductFormData {
   name: string;
-  categoryId: string;
   subCategoryId: string;
   subSubCategoryId?: string;
   description: string;
@@ -81,14 +80,8 @@ interface ProductFormData {
   }>;
   images: string[];
   dynamicFields?: Record<string, any>;
+  colorImageFiles?: File[][]; // Array of arrays, each for a color
 }
-
-const CATEGORIES = {
-  APPARELS: 'apparels',
-  TROPHIES: 'trophies',
-  CORPORATE_GIFTS: 'corporate_gifts',
-  PERSONALISED_GIFTS: 'personalised_gifts'
-};
 
 export default function ProductForm({ productId, isEditing = false }: ProductFormProps) {
   const router = useRouter();
@@ -100,7 +93,6 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
   
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
-    categoryId: Object.values(CATEGORIES)[0],
     subCategoryId: "",
     description: "",
     pricing: {
@@ -116,26 +108,21 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     images: []
   });
 
-  // Fetch subcategories based on selected category
+  // Add state for image files
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [colorImageFiles, setColorImageFiles] = useState<File[][]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch subcategories
   useEffect(() => {
     const fetchSubCategories = async () => {
-      if (!formData.categoryId) return;
-      
       setLoading(true);
       try {
-        // Using the same pattern as in subcategories page
         const response = await authenticatedRequest<{ success: boolean; data: SubCategory[] }>(
           `/subcategories`
         );
-        
-        // Filter subcategories by category
-        const filteredSubcategories = response.data.filter(
-          subcat => subcat.category === formData.categoryId
-        );
-        
-        setSubCategories(filteredSubcategories);
+        setSubCategories(response.data);
       } catch (err: any) {
-        console.error("Failed to fetch subcategories:", err);
         setError(err.message || "Failed to fetch subcategories");
         setSubCategories([]);
       } finally {
@@ -144,7 +131,7 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     };
 
     fetchSubCategories();
-  }, [formData.categoryId]);
+  }, []);
 
   // Fetch sub-subcategories based on selected subcategory
   useEffect(() => {
@@ -187,7 +174,6 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         // Transform product data to match form structure
         setFormData({
           name: product.name,
-          categoryId: product.categoryId,
           subCategoryId: typeof product.subCategoryId === 'object' && product.subCategoryId !== null 
             ? product.subCategoryId._id 
             : product.subCategoryId as string,
@@ -245,23 +231,24 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     });
   };
 
-  // Handle number input changes
+  // Update handleNumberChange to default to 0 if empty
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+    const num = value === "" ? 0 : parseFloat(value);
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData({
         ...formData,
         [parent]: {
           ...(formData[parent as keyof ProductFormData] as object),
-          [child]: parseFloat(value) || 0
+          [child]: num
         }
       });
     } else {
       setFormData({
         ...formData,
-        [name]: parseFloat(value) || 0
+        [name]: num
       });
     }
   };
@@ -295,17 +282,20 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       ...formData,
       colors: [...formData.colors, { name: "", images: [] }]
     });
+    setColorImageFiles([...colorImageFiles, []]);
   };
 
   // Remove color
   const removeColor = (index: number) => {
     const updatedColors = [...formData.colors];
     updatedColors.splice(index, 1);
-    
     setFormData({
       ...formData,
       colors: updatedColors.length ? updatedColors : [{ name: "", images: [] }]
     });
+    const updatedColorFiles = [...colorImageFiles];
+    updatedColorFiles.splice(index, 1);
+    setColorImageFiles(updatedColorFiles);
   };
 
   // Handle image URL changes
@@ -386,46 +376,114 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     });
   };
 
-  // Handle form submission
+  // Handle image file selection
+  const handleImageFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files));
+    }
+  };
+
+  // Remove a selected image file
+  const removeImageFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle color image file selection
+  const handleColorImageFilesChange = (colorIdx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArr = Array.from(e.target.files);
+      setColorImageFiles(prev => {
+        const updated = [...prev];
+        updated[colorIdx] = filesArr;
+        return updated;
+      });
+    }
+  };
+
+  // Remove a selected color image file
+  const removeColorImageFile = (colorIdx: number, fileIdx: number) => {
+    setColorImageFiles(prev => {
+      const updated = [...prev];
+      updated[colorIdx] = updated[colorIdx].filter((_, i) => i !== fileIdx);
+      return updated;
+    });
+  };
+
+  // Add validation before submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
+    // Validate pricing fields
+    const { mrp, regular, reseller, special } = formData.pricing;
+    if (
+      isNaN(mrp) || mrp <= 0 ||
+      isNaN(regular) || regular <= 0 ||
+      isNaN(reseller) || reseller <= 0 ||
+      isNaN(special) || special <= 0
+    ) {
+      setError("All pricing fields are required and must be greater than 0.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Remove empty images
+      // Remove empty images from URLs
       const cleanedFormData = {
         ...formData,
         images: formData.images.filter(img => img.trim() !== ""),
         colors: formData.colors.filter(color => color.name.trim() !== "")
       };
-      
+
+      const formPayload = new FormData();
+      formPayload.append("name", cleanedFormData.name);
+      formPayload.append("subCategoryId", cleanedFormData.subCategoryId);
+      if (cleanedFormData.subSubCategoryId)
+        formPayload.append("subSubCategoryId", cleanedFormData.subSubCategoryId);
+      formPayload.append("description", cleanedFormData.description);
+
+      // FIX: Always stringify objects/arrays
+      formPayload.append("pricing", JSON.stringify(cleanedFormData.pricing));
+      formPayload.append("stock", String(cleanedFormData.stock));
+      formPayload.append("isActive", String(cleanedFormData.isActive));
+      formPayload.append("sizes", JSON.stringify(cleanedFormData.sizes));
+      // Remove color images (urls) from color objects, backend will set them
+      const colorsWithoutImages = cleanedFormData.colors.map((c) => ({ ...c, images: [] }));
+      formPayload.append("colors", JSON.stringify(colorsWithoutImages));
+      formPayload.append("dynamicFields", JSON.stringify(cleanedFormData.dynamicFields || {}));
+
+      // Main product images
+      imageFiles.forEach((file) => {
+        formPayload.append("images", file);
+      });
+      // Color images: send as colorImages-0, colorImages-1, etc.
+      colorImageFiles.forEach((files, colorIdx) => {
+        files.forEach((file) => {
+          formPayload.append(`colorImages-${colorIdx}`, file);
+        });
+      });
+
+      let endpoint = "/products";
+      let method = "POST";
       if (isEditing && productId) {
-        // Update existing product
-        await authenticatedRequest(`/products/${productId}`, {
-          method: "PUT",
-          body: JSON.stringify(cleanedFormData),
-        });
-        setSuccessMessage("Product updated successfully");
-        
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push(`/dashboard/products/${productId}`);
-        }, 1500);
-      } else {
-        // Create new product
-        const response = await authenticatedRequest<{ _id: string }>("/products", {
-          method: "POST",
-          body: JSON.stringify(cleanedFormData),
-        });
-        
-        setSuccessMessage("Product created successfully");
-        
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push(`/dashboard/products/${response._id}`);
-        }, 1500);
+        endpoint = `/products/${productId}`;
+        method = "PUT";
       }
+
+      await authenticatedRequest(endpoint, {
+        method,
+        body: formPayload,
+      });
+
+      setSuccessMessage(isEditing ? "Product updated successfully" : "Product created successfully");
+      setTimeout(() => {
+        if (isEditing && productId) {
+          router.push(`/dashboard/products/${productId}`);
+        } else {
+          router.push(`/dashboard/products`);
+        }
+      }, 1500);
     } catch (err: any) {
       setError(err.message || "Failed to save product");
     } finally {
@@ -480,26 +538,6 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
           
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Category *
-            </label>
-            <select
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
-            >
-              <option value="">Select a category</option>
-              {Object.entries(CATEGORIES).map(([label, value]) => (
-                <option key={value} value={value}>
-                  {label.replace('_', ' ')}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Subcategory *
             </label>
             <select
@@ -516,9 +554,9 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                 </option>
               ))}
             </select>
-            {subCategories.length === 0 && formData.categoryId && (
+            {subCategories.length === 0 && (
               <p className="mt-1 text-sm text-yellow-600">
-                No subcategories found for this category. Please create one first.
+                No subcategories found. Please create one first.
               </p>
             )}
           </div>
@@ -725,34 +763,26 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-xs text-gray-500 dark:text-gray-400">
-                        Color Images (URLs)
+                        Color Images (Upload)
                       </label>
-                      <button
-                        type="button"
-                        onClick={() => addColorImageField(index)}
-                        className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                      >
-                        Add Image
-                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={e => handleColorImageFilesChange(index, e)}
+                        className="text-xs"
+                      />
                     </div>
                     
-                    {color.images.length === 0 ? (
-                      <p className="text-xs text-gray-500 italic">No images added for this color</p>
-                    ) : (
+                    {colorImageFiles[index] && colorImageFiles[index].length > 0 && (
                       <div className="space-y-2">
-                        {color.images.map((imageUrl, imageIndex) => (
-                          <div key={imageIndex} className="flex items-center space-x-2">
-                            <input
-                              type="text"
-                              value={imageUrl}
-                              onChange={(e) => handleColorImageUrlChange(index, imageIndex, e.target.value)}
-                              placeholder="https://example.com/image.jpg"
-                              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 text-sm"
-                            />
+                        {colorImageFiles[index].map((file, fileIdx) => (
+                          <div key={fileIdx} className="flex items-center space-x-2">
+                            <span className="text-xs">{file.name}</span>
                             <button
                               type="button"
-                              onClick={() => removeColorImageField(index, imageIndex)}
-                              className="px-2 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                              onClick={() => removeColorImageFile(index, fileIdx)}
+                              className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
                             >
                               Remove
                             </button>
@@ -771,45 +801,61 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Images</h2>
-            <button
-              type="button"
-              onClick={addImageField}
-              className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
-            >
-              Add Image
-            </button>
+            <label className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm cursor-pointer">
+              Add Images
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                ref={fileInputRef}
+                onChange={handleImageFilesChange}
+                className="hidden"
+              />
+            </label>
           </div>
-          
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Please provide URLs for your product images. The first image will be used as the main product image.
+            Upload product images. The first image will be used as the main product image.
           </p>
-          
-          {formData.images.length === 0 && (
-            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <p className="text-center text-gray-500 dark:text-gray-400">
-                No images added yet. Click "Add Image" to add your first image.
-              </p>
+          {/* Show selected files */}
+          {imageFiles.length > 0 && (
+            <div className="space-y-2">
+              {imageFiles.map((file, idx) => (
+                <div key={idx} className="flex items-center space-x-2">
+                  <span className="text-sm">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeImageFile(idx)}
+                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
             </div>
           )}
-          
-          {formData.images.map((image, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={image}
-                onChange={(e) => handleImageChange(e, index)}
-                placeholder="https://example.com/image.jpg"
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
-              />
-              <button
-                type="button"
-                onClick={() => removeImageField(index)}
-                className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Remove
-              </button>
+          {/* Optionally, keep the URL fields for backward compatibility */}
+          {formData.images.length > 0 && (
+            <div className="space-y-2">
+              {formData.images.map((image, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={image}
+                    onChange={(e) => handleImageChange(e, index)}
+                    placeholder="https://example.com/image.jpg"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImageField(index)}
+                    className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
         
         {/* Submit Buttons */}

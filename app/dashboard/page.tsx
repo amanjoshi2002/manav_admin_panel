@@ -44,6 +44,13 @@ export default function Dashboard() {
             </div>
           </Link>
           
+          <Link href="/dashboard/categories" className="block">
+            <div className="bg-pink-50 dark:bg-pink-900/20 p-4 rounded-lg border border-pink-100 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-800/30 transition-colors">
+              <h4 className="font-bold">Category Management</h4>
+              <p className="text-sm mt-2">Manage categories and their attributes</p>
+            </div>
+          </Link>
+          
           <Link href="/dashboard/subcategories" className="block">
             <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-100 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-800/30 transition-colors">
               <h4 className="font-bold">Subcategory Management</h4>

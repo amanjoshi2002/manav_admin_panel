@@ -33,13 +33,6 @@ interface Product {
   updatedAt: string;
 }
 
-const CATEGORIES = {
-  APPARELS: 'apparels',
-  TROPHIES: 'trophies',
-  CORPORATE_GIFTS: 'corporate_gifts',
-  PERSONALISED_GIFTS: 'personalised_gifts'
-};
-
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,12 +88,6 @@ export default function ProductsPage() {
       style: 'currency',
       currency: 'INR'
     }).format(price);
-  };
-
-  // Get category name from ID
-  const getCategoryName = (categoryId: string) => {
-    const category = Object.entries(CATEGORIES).find(([_, value]) => value === categoryId);
-    return category ? category[0].replace('_', ' ') : categoryId;
   };
 
   return (
@@ -168,9 +155,6 @@ export default function ProductsPage() {
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Subcategory
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -207,13 +191,15 @@ export default function ProductsPage() {
                       {product.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {getCategoryName(product.categoryId)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       {product.subCategoryId?.name || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                      {product.pricing && product.pricing.mrp ? formatPrice(product.pricing.mrp) : 'N/A'}
+                      {product.pricing &&
+                        !isNaN(Number(product.pricing.mrp)) &&
+                        product.pricing.mrp !== null &&
+                        product.pricing.mrp !== undefined
+                        ? formatPrice(Number(product.pricing.mrp))
+                        : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

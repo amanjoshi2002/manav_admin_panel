@@ -34,13 +34,6 @@ interface Product {
   updatedAt: string;
 }
 
-const CATEGORIES = {
-  APPARELS: 'apparels',
-  TROPHIES: 'trophies',
-  CORPORATE_GIFTS: 'corporate_gifts',
-  PERSONALISED_GIFTS: 'personalised_gifts'
-};
-
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -72,12 +65,6 @@ export default function ProductDetailPage() {
       style: 'currency',
       currency: 'INR'
     }).format(price);
-  };
-
-  // Get category name from ID
-  const getCategoryName = (categoryId: string) => {
-    const category = Object.entries(CATEGORIES).find(([_, value]) => value === categoryId);
-    return category ? category[0].replace('_', ' ') : categoryId;
   };
 
   if (loading) {
@@ -161,16 +148,6 @@ export default function ProductDetailPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Category</p>
-                  <p className="font-medium">{getCategoryName(product.categoryId)}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Subcategory</p>
-                  <p className="font-medium">{product.subCategoryId?.name || "N/A"}</p>
-                </div>
-                
-                <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Stock</p>
                   <p className="font-medium">{product.stock}</p>
                 </div>
@@ -190,22 +167,50 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">MRP</p>
-                  <p className="font-medium">{product.pricing && formatPrice(product.pricing.mrp)}</p>
+                  <p className="font-medium">
+                    {product.pricing &&
+                    !isNaN(Number(product.pricing.mrp)) &&
+                    product.pricing.mrp !== null &&
+                    product.pricing.mrp !== undefined
+                      ? formatPrice(Number(product.pricing.mrp))
+                      : "N/A"}
+                  </p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Regular Price</p>
-                  <p className="font-medium">{product.pricing && formatPrice(product.pricing.regular)}</p>
+                  <p className="font-medium">
+                    {product.pricing &&
+                    !isNaN(Number(product.pricing.regular)) &&
+                    product.pricing.regular !== null &&
+                    product.pricing.regular !== undefined
+                      ? formatPrice(Number(product.pricing.regular))
+                      : "N/A"}
+                  </p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Reseller Price</p>
-                  <p className="font-medium">{product.pricing && formatPrice(product.pricing.reseller)}</p>
+                  <p className="font-medium">
+                    {product.pricing &&
+                    !isNaN(Number(product.pricing.reseller)) &&
+                    product.pricing.reseller !== null &&
+                    product.pricing.reseller !== undefined
+                      ? formatPrice(Number(product.pricing.reseller))
+                      : "N/A"}
+                  </p>
                 </div>
                 
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Special Price</p>
-                  <p className="font-medium">{product.pricing && formatPrice(product.pricing.special)}</p>
+                  <p className="font-medium">
+                    {product.pricing &&
+                    !isNaN(Number(product.pricing.special)) &&
+                    product.pricing.special !== null &&
+                    product.pricing.special !== undefined
+                      ? formatPrice(Number(product.pricing.special))
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
             </div>

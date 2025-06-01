@@ -17,6 +17,8 @@ export default function PdfsPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState<Partial<Pdf>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const fetchPdfs = async () => {
     setLoading(true);
@@ -38,24 +40,38 @@ export default function PdfsPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPdfFile(e.target.files?.[0] || null);
+  };
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageFile(e.target.files?.[0] || null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append("name", form.name || "");
+      formData.append("description", form.description || "");
+      if (pdfFile) formData.append("pdf", pdfFile);
+      if (imageFile) formData.append("image", imageFile);
+
+      let endpoint = "/pdfs";
+      let method = "POST";
       if (editingId) {
-        await authenticatedRequest(`/pdfs/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(form),
-          headers: { "Content-Type": "application/json" },
-        });
-      } else {
-        await authenticatedRequest("/pdfs", {
-          method: "POST",
-          body: JSON.stringify(form),
-          headers: { "Content-Type": "application/json" },
-        });
+        endpoint = `/pdfs/${editingId}`;
+        method = "PUT";
       }
+
+      await authenticatedRequest(endpoint, {
+        method,
+        body: formData,
+      });
+
       setForm({});
       setEditingId(null);
+      setPdfFile(null);
+      setImageFile(null);
       fetchPdfs();
     } catch (err: any) {
       setError(err.message || "Failed to save PDF");
@@ -93,19 +109,18 @@ export default function PdfsPage() {
             required
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
+          {/* PDF file upload */}
           <input
-            name="pdfLink"
-            placeholder="PDF Link"
-            value={form.pdfLink || ""}
-            onChange={handleChange}
-            required
+            type="file"
+            accept="application/pdf"
+            onChange={handlePdfFileChange}
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
+          {/* Image file upload */}
           <input
-            name="image"
-            placeholder="Image URL"
-            value={form.image || ""}
-            onChange={handleChange}
+            type="file"
+            accept="image/*"
+            onChange={handleImageFileChange}
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
           <textarea

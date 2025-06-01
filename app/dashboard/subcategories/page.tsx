@@ -34,12 +34,13 @@ interface SubCategory {
   updatedAt: string;
 }
 
-const CATEGORIES = {
-  APPARELS: 'apparels',
-  TROPHIES: 'trophies',
-  CORPORATE_GIFTS: 'corporate_gifts',
-  PERSONALISED_GIFTS: 'personalised_gifts'
-};
+interface Category {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  image?: string;
+}
 
 export default function SubcategoriesPage() {
   const [subcategories, setSubcategories] = useState<SubCategory[]>([]);
@@ -75,6 +76,14 @@ export default function SubcategoriesPage() {
     isActive: true
   });
 
+  // Category states
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  // Add to state for file handling
+  const [subcategoryImage, setSubcategoryImage] = useState<File | null>(null);
+  const [subSubcategoryImage, setSubSubcategoryImage] = useState<File | null>(null);
+
   // Fetch all subcategories
   const fetchSubcategories = async () => {
     setLoading(true);
@@ -88,8 +97,19 @@ export default function SubcategoriesPage() {
     }
   };
 
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const data = await authenticatedRequest<Category[]>("/categories");
+      setCategories(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch categories");
+    }
+  };
+
   useEffect(() => {
     fetchSubcategories();
+    fetchCategories();
   }, []);
 
   // Handle form input changes
@@ -113,24 +133,30 @@ export default function SubcategoriesPage() {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError("");
     try {
-      if (formMode === 'create') {
-        await authenticatedRequest("/subcategories", {
-          method: "POST",
-          body: JSON.stringify(newSubcategory),
-        });
-        setSuccessMessage("Subcategory created successfully");
-      } else {
-        // Update subcategory
-        await authenticatedRequest(`/subcategories/${selectedSubcategory?._id}`, {
-          method: "PUT",
-          body: JSON.stringify(newSubcategory),
-        });
-        setSuccessMessage("Subcategory updated successfully");
-      }
-      
-      // Reset form and refresh data
+      const formData = new FormData();
+      formData.append("name", newSubcategory.name || "");
+      formData.append("category", newSubcategory.category || "");
+      formData.append("description", newSubcategory.description || "");
+      formData.append("isActive", String(newSubcategory.isActive));
+      if (subcategoryImage) formData.append("image", subcategoryImage);
+
+      const endpoint = formMode === "create"
+        ? "/subcategories"
+        : `/subcategories/${selectedSubcategory?._id}`;
+      const method = formMode === "create" ? "POST" : "PUT";
+
+      await authenticatedRequest(endpoint, {
+        method,
+        body: formData,
+        // Don't set Content-Type, browser will set it for FormData
+      });
+
+      setSuccessMessage(formMode === "create"
+        ? "Subcategory created successfully"
+        : "Subcategory updated successfully"
+      );
       setShowForm(false);
       setNewSubcategory({
         name: '',
@@ -141,12 +167,9 @@ export default function SubcategoriesPage() {
         subCategories: [],
         isActive: true
       });
+      setSubcategoryImage(null);
       fetchSubcategories();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err: any) {
       setError(err.message || "Failed to save subcategory");
     }
@@ -155,25 +178,33 @@ export default function SubcategoriesPage() {
   // Handle sub-subcategory form submission
   const handleSubSubSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError("");
     try {
+      const formData = new FormData();
+      formData.append("name", newSubSubcategory.name || "");
+      formData.append("description", newSubSubcategory.description || "");
+      formData.append("isActive", String(newSubSubcategory.isActive));
+      if (subSubcategoryImage) formData.append("image", subSubcategoryImage);
+
+      let endpoint = "";
+      let method = "";
       if (!selectedSubSubcategory?._id) {
-        // Create new sub-subcategory
-        await authenticatedRequest(`/subcategories/${parentSubcategoryId}/sub`, {
-          method: "POST",
-          body: JSON.stringify(newSubSubcategory),
-        });
-        setSuccessMessage("Sub-subcategory added successfully");
+        endpoint = `/subcategories/${parentSubcategoryId}/sub`;
+        method = "POST";
       } else {
-        // Update existing sub-subcategory
-        await authenticatedRequest(`/subcategories/${parentSubcategoryId}/sub/${selectedSubSubcategory._id}`, {
-          method: "PUT",
-          body: JSON.stringify(newSubSubcategory),
-        });
-        setSuccessMessage("Sub-subcategory updated successfully");
+        endpoint = `/subcategories/${parentSubcategoryId}/sub/${selectedSubSubcategory._id}`;
+        method = "PUT";
       }
-      
-      // Reset form and refresh data
+
+      await authenticatedRequest(endpoint, {
+        method,
+        body: formData,
+      });
+
+      setSuccessMessage(!selectedSubSubcategory?._id
+        ? "Sub-subcategory added successfully"
+        : "Sub-subcategory updated successfully"
+      );
       setShowSubSubForm(false);
       setSelectedSubSubcategory(null);
       setParentSubcategoryId("");
@@ -184,12 +215,9 @@ export default function SubcategoriesPage() {
         attributes: [],
         isActive: true
       });
+      setSubSubcategoryImage(null);
       fetchSubcategories();
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err: any) {
       setError(err.message || "Failed to save sub-subcategory");
     }
@@ -258,8 +286,32 @@ export default function SubcategoriesPage() {
     }
   };
 
+  // Filter subcategories by selected category
+  const filteredSubcategories = selectedCategory
+    ? subcategories.filter((sc) => sc.category === selectedCategory)
+    : subcategories;
+
   return (
     <div className="space-y-6">
+      {/* Category filter bar */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button
+          className={`px-3 py-1 rounded ${selectedCategory === "" ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
+          onClick={() => setSelectedCategory("")}
+        >
+          All Categories
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat._id}
+            className={`px-3 py-1 rounded ${selectedCategory === cat._id ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
+            onClick={() => setSelectedCategory(cat._id)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Subcategory Management</h1>
         <div className="space-x-2">
@@ -349,9 +401,9 @@ export default function SubcategoriesPage() {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
               >
                 <option value="">Select a category</option>
-                {Object.values(CATEGORIES).map((category) => (
-                  <option key={category} value={category}>
-                    {category.replace('_', ' ').toUpperCase()}
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
                   </option>
                 ))}
               </select>
@@ -372,13 +424,12 @@ export default function SubcategoriesPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Image URL
+                Image
               </label>
               <input
-                type="text"
-                name="image"
-                value={newSubcategory.image}
-                onChange={handleInputChange}
+                type="file"
+                accept="image/*"
+                onChange={e => setSubcategoryImage(e.target.files?.[0] || null)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
               />
             </div>
@@ -461,13 +512,12 @@ export default function SubcategoriesPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Image URL
+                  Image
                 </label>
                 <input
-                  type="text"
-                  name="image"
-                  value={newSubSubcategory.image}
-                  onChange={handleSubSubInputChange}
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setSubSubcategoryImage(e.target.files?.[0] || null)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
                 />
               </div>
@@ -516,13 +566,13 @@ export default function SubcategoriesPage() {
       {/* Subcategories List */}
       {loading ? (
         <div className="text-center py-4">Loading subcategories...</div>
-      ) : subcategories.length === 0 ? (
+      ) : filteredSubcategories.length === 0 ? (
         <div className="text-center py-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           No subcategories found. Create your first one!
         </div>
       ) : (
         <div className="space-y-6">
-          {subcategories.map((subcategory) => (
+          {filteredSubcategories.map((subcategory) => (
             <div key={subcategory._id} className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-start">

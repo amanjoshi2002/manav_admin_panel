@@ -1,5 +1,5 @@
 // API base URL configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-manav.onrender.com/api";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Interface definitions
 interface LoginResponse {
@@ -76,19 +76,22 @@ export async function authenticatedRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = getAuthToken();
-  
-  const headers = {
-    ...options.headers,
-    "Content-Type": "application/json",
+
+  // Only set Content-Type if body is not FormData
+  let headers: Record<string, string> = {
+    ...options.headers as Record<string, string>,
     "Authorization": token ? `Bearer ${token}` : "",
   };
-  
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
     credentials: "include",
   });
-  
+
   return handleResponse<T>(response);
 }
 

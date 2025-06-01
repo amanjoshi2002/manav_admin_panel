@@ -17,6 +17,8 @@ export default function VideosPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState<Partial<Video>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const fetchVideos = async () => {
     setLoading(true);
@@ -38,24 +40,39 @@ export default function VideosPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVideoFile(e.target.files?.[0] || null);
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageFile(e.target.files?.[0] || null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append("name", form.name || "");
+      formData.append("description", form.description || "");
+      if (videoFile) formData.append("video", videoFile);
+      if (imageFile) formData.append("image", imageFile);
+
+      let endpoint = "/videos";
+      let method = "POST";
       if (editingId) {
-        await authenticatedRequest(`/videos/${editingId}`, {
-          method: "PUT",
-          body: JSON.stringify(form),
-          headers: { "Content-Type": "application/json" },
-        });
-      } else {
-        await authenticatedRequest("/videos", {
-          method: "POST",
-          body: JSON.stringify(form),
-          headers: { "Content-Type": "application/json" },
-        });
+        endpoint = `/videos/${editingId}`;
+        method = "PUT";
       }
+
+      await authenticatedRequest(endpoint, {
+        method,
+        body: formData,
+      });
+
       setForm({});
       setEditingId(null);
+      setVideoFile(null);
+      setImageFile(null);
       fetchVideos();
     } catch (err: any) {
       setError(err.message || "Failed to save video");
@@ -93,19 +110,18 @@ export default function VideosPage() {
             required
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
+          {/* Video file upload */}
           <input
-            name="videoLink"
-            placeholder="Video Link"
-            value={form.videoLink || ""}
-            onChange={handleChange}
-            required
+            type="file"
+            accept="video/*"
+            onChange={handleVideoFileChange}
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
+          {/* Image file upload */}
           <input
-            name="image"
-            placeholder="Image URL"
-            value={form.image || ""}
-            onChange={handleChange}
+            type="file"
+            accept="image/*"
+            onChange={handleImageFileChange}
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-400"
           />
           <textarea
