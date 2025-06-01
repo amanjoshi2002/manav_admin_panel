@@ -1,5 +1,5 @@
 // API base URL configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://13.233.247.244/api";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Interface definitions
 interface LoginResponse {
