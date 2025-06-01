@@ -1,5 +1,5 @@
 // API base URL configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "NEXT_PUBLIC_API_URL=https://manavadmin.nextcraftsolution.site/api";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://manavadmin.nextcraftsolution.site/api";
 
 // Interface definitions
 interface LoginResponse {
