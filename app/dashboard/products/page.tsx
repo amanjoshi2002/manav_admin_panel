@@ -18,6 +18,7 @@ interface Product {
     customer: number;
     reseller: number;
     special: number;
+    gst: number;
   };
   description?: string;
   colors: Array<{

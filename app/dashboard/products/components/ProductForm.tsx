@@ -40,6 +40,7 @@ interface Product {
     customer: number;
     reseller: number;
     special: number;
+    gst: number;
   };
   description?: string;
   colors?: Array<{
@@ -70,6 +71,7 @@ interface ProductFormData {
     customer: number;
     reseller: number;
     special: number;
+    gst: number;
   };
   stock: number;
   isActive: boolean;
@@ -99,7 +101,8 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       mrp: 0,
       customer: 0,
       reseller: 0,
-      special: 0
+      special: 0,
+      gst: 0
     },
     stock: 0,
     isActive: true,
@@ -183,7 +186,8 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             mrp: product.pricing?.mrp || 0,
             customer: product.pricing?.customer || 0,
             reseller: product.pricing?.reseller || 0,
-            special: product.pricing?.special || 0
+            special: product.pricing?.special || 0,
+            gst: product.pricing?.gst || 0
           },
           stock: product.stock || 0,
           isActive: product.isActive,
@@ -416,12 +420,13 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     setError("");
 
     // Validate pricing fields
-    const { mrp, customer, reseller, special } = formData.pricing;
+    const { mrp, customer, reseller, special, gst } = formData.pricing;
     if (
       isNaN(mrp) || mrp <= 0 ||
       isNaN(customer) || customer <= 0 ||
       isNaN(reseller) || reseller <= 0 ||
-      isNaN(special) || special <= 0
+      isNaN(special) || special <= 0 ||
+      isNaN(gst) || gst < 0
     ) {
       setError("All pricing fields are required and must be greater than 0.");
       setLoading(false);
@@ -654,6 +659,21 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                 type="number"
                 name="pricing.special"
                 value={formData.pricing.special}
+                onChange={handleNumberChange}
+                min="0"
+                step="0.01"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                GST (%)
+              </label>
+              <input
+                type="number"
+                name="pricing.gst"
+                value={formData.pricing.gst}
                 onChange={handleNumberChange}
                 min="0"
                 step="0.01"

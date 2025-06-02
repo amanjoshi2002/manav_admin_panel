@@ -19,6 +19,7 @@ interface Product {
     customer: number;
     reseller: number;
     special: number;
+    gst: number;
   };
   description?: string;
   colors: Array<{
@@ -209,6 +210,18 @@ export default function ProductDetailPage() {
                     product.pricing.special !== null &&
                     product.pricing.special !== undefined
                       ? formatPrice(Number(product.pricing.special))
+                      : "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">GST</p>
+                  <p className="font-medium">
+                    {product.pricing &&
+                    !isNaN(Number(product.pricing.gst)) &&
+                    product.pricing.gst !== null &&
+                    product.pricing.gst !== undefined
+                      ? `${product.pricing.gst}%`
                       : "N/A"}
                   </p>
                 </div>
