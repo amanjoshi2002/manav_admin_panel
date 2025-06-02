@@ -426,12 +426,35 @@ export default function SubcategoriesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Image
               </label>
+              <label
+                htmlFor="subcategory-image"
+                className="inline-block px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700"
+              >
+                {subcategoryImage ? "Change Image" : "Choose Image"}
+              </label>
               <input
+                id="subcategory-image"
                 type="file"
                 accept="image/*"
                 onChange={e => setSubcategoryImage(e.target.files?.[0] || null)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                className="hidden"
               />
+              {/* Preview selected image */}
+              {subcategoryImage && (
+                <img
+                  src={URL.createObjectURL(subcategoryImage)}
+                  alt="Preview"
+                  className="mt-2 h-16 rounded"
+                />
+              )}
+              {/* Show current image if editing and no new image selected */}
+              {!subcategoryImage && newSubcategory.image && typeof newSubcategory.image === "string" && (
+                <img
+                  src={newSubcategory.image}
+                  alt="Subcategory"
+                  className="mt-2 h-16 rounded"
+                />
+              )}
             </div>
             
             <div>

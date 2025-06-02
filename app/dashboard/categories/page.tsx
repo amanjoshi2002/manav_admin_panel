@@ -186,13 +186,29 @@ export default function CategoryPage() {
           </div>
           <div className="mb-4">
             <label className="block font-semibold mb-1">Image</label>
+            <label
+              htmlFor="category-image"
+              className="inline-block px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700"
+            >
+              {form.image ? "Change Image" : "Choose Image"}
+            </label>
             <input
+              id="category-image"
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full"
+              className="hidden"
             />
-            {editCategory?.image && (
+            {/* Preview selected image */}
+            {form.image && (
+              <img
+                src={URL.createObjectURL(form.image)}
+                alt="Preview"
+                className="mt-2 h-16 rounded"
+              />
+            )}
+            {/* Show current image if editing and no new image selected */}
+            {!form.image && editCategory?.image && (
               <img
                 src={editCategory.image}
                 alt="Category"

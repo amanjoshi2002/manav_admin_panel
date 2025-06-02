@@ -765,31 +765,62 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                       <label className="block text-xs text-gray-500 dark:text-gray-400">
                         Color Images (Upload)
                       </label>
+                      <label
+                        htmlFor={`color-images-${index}`}
+                        className="inline-block px-3 py-1 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 text-xs"
+                      >
+                        {colorImageFiles[index] && colorImageFiles[index].length > 0
+                          ? "Change Images"
+                          : "Choose Images"}
+                      </label>
                       <input
+                        id={`color-images-${index}`}
                         type="file"
                         accept="image/*"
                         multiple
                         onChange={e => handleColorImageFilesChange(index, e)}
-                        className="text-xs"
+                        className="hidden"
                       />
                     </div>
-                    
+
+                    {/* Preview selected color images */}
                     {colorImageFiles[index] && colorImageFiles[index].length > 0 && (
-                      <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {colorImageFiles[index].map((file, fileIdx) => (
-                          <div key={fileIdx} className="flex items-center space-x-2">
-                            <span className="text-xs">{file.name}</span>
+                          <div key={fileIdx} className="relative">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Color ${index + 1} Preview ${fileIdx + 1}`}
+                              className="h-12 w-12 object-cover rounded"
+                            />
                             <button
                               type="button"
                               onClick={() => removeColorImageFile(index, fileIdx)}
-                              className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                              className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                              title="Remove"
                             >
-                              Remove
+                              &times;
                             </button>
                           </div>
                         ))}
                       </div>
                     )}
+
+                    {/* Show current images if editing and no new images selected */}
+                    {(!colorImageFiles[index] || colorImageFiles[index].length === 0) &&
+                      color.images &&
+                      color.images.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {color.images.map((img, imgIdx) => (
+                            <img
+                              key={imgIdx}
+                              src={img}
+                              alt={`Color ${index + 1} Image ${imgIdx + 1}`}
+                              className="h-12 w-12 object-cover rounded"
+                            />
+                          ))}
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -799,60 +830,54 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         
         {/* Images */}
         <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Images</h2>
-            <label className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm cursor-pointer">
-              Add Images
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleImageFilesChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Upload product images. The first image will be used as the main product image.
-          </p>
-          {/* Show selected files */}
+          <h2 className="text-xl font-semibold">Images</h2>
+          <label
+            htmlFor="product-images"
+            className="inline-block px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700"
+          >
+            {imageFiles.length > 0 ? "Change Images" : "Choose Images"}
+          </label>
+          <input
+            id="product-images"
+            type="file"
+            accept="image/*"
+            multiple
+            ref={fileInputRef}
+            onChange={handleImageFilesChange}
+            className="hidden"
+          />
+          {/* Preview selected images */}
           {imageFiles.length > 0 && (
-            <div className="space-y-2">
+            <div className="flex flex-wrap gap-2 mt-2">
               {imageFiles.map((file, idx) => (
-                <div key={idx} className="flex items-center space-x-2">
-                  <span className="text-sm">{file.name}</span>
+                <div key={idx} className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Preview ${idx + 1}`}
+                    className="h-16 w-16 object-cover rounded"
+                  />
                   <button
                     type="button"
                     onClick={() => removeImageFile(idx)}
-                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                    title="Remove"
                   >
-                    Remove
+                    &times;
                   </button>
                 </div>
               ))}
             </div>
           )}
-          {/* Optionally, keep the URL fields for backward compatibility */}
-          {formData.images.length > 0 && (
-            <div className="space-y-2">
-              {formData.images.map((image, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={image}
-                    onChange={(e) => handleImageChange(e, index)}
-                    placeholder="https://example.com/image.jpg"
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImageField(index)}
-                    className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Remove
-                  </button>
-                </div>
+          {/* Show current images if editing and no new images selected */}
+          {imageFiles.length === 0 && formData.images && formData.images.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {formData.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Product ${idx + 1}`}
+                  className="h-16 w-16 object-cover rounded"
+                />
               ))}
             </div>
           )}

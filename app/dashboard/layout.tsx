@@ -73,6 +73,21 @@ export default function DashboardLayout({
               </li>
               <li>
                 <Link 
+                  href="/dashboard/categories" 
+                  className={`flex items-center p-2 rounded-lg ${
+                    isActive('/dashboard/categories')
+                      ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 8a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H4zm8-8a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2zm0 8a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z" />
+                  </svg>
+                  Category Management
+                </Link>
+              </li>
+              <li>
+                <Link 
                   href="/dashboard/products" 
                   className={`flex items-center p-2 rounded-lg ${
                     isActive('/dashboard/products')
