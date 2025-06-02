@@ -37,7 +37,7 @@ interface Product {
   subSubCategoryId?: string;
   pricing?: {
     mrp: number;
-    regular: number;
+    customer: number;
     reseller: number;
     special: number;
   };
@@ -67,7 +67,7 @@ interface ProductFormData {
   description: string;
   pricing: {
     mrp: number;
-    regular: number;
+    customer: number;
     reseller: number;
     special: number;
   };
@@ -97,7 +97,7 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     description: "",
     pricing: {
       mrp: 0,
-      regular: 0,
+      customer: 0,
       reseller: 0,
       special: 0
     },
@@ -181,7 +181,7 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
           description: product.description || "",
           pricing: {
             mrp: product.pricing?.mrp || 0,
-            regular: product.pricing?.regular || 0,
+            customer: product.pricing?.customer || 0,
             reseller: product.pricing?.reseller || 0,
             special: product.pricing?.special || 0
           },
@@ -416,10 +416,10 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     setError("");
 
     // Validate pricing fields
-    const { mrp, regular, reseller, special } = formData.pricing;
+    const { mrp, customer, reseller, special } = formData.pricing;
     if (
       isNaN(mrp) || mrp <= 0 ||
-      isNaN(regular) || regular <= 0 ||
+      isNaN(customer) || customer <= 0 ||
       isNaN(reseller) || reseller <= 0 ||
       isNaN(special) || special <= 0
     ) {
@@ -617,12 +617,12 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Regular Price *
+                customer Price *
               </label>
               <input
                 type="number"
-                name="pricing.regular"
-                value={formData.pricing.regular}
+                name="pricing.customer"
+                value={formData.pricing.customer}
                 onChange={handleNumberChange}
                 required
                 min="0"

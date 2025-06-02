@@ -16,7 +16,7 @@ interface Product {
   subSubCategoryId: string;
   pricing: {
     mrp: number;
-    regular: number;
+    customer: number;
     reseller: number;
     special: number;
   };
@@ -178,13 +178,13 @@ export default function ProductDetailPage() {
                 </div>
                 
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Regular Price</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">customer Price</p>
                   <p className="font-medium">
                     {product.pricing &&
-                    !isNaN(Number(product.pricing.regular)) &&
-                    product.pricing.regular !== null &&
-                    product.pricing.regular !== undefined
-                      ? formatPrice(Number(product.pricing.regular))
+                    !isNaN(Number(product.pricing.customer)) &&
+                    product.pricing.customer !== null &&
+                    product.pricing.customer !== undefined
+                      ? formatPrice(Number(product.pricing.customer))
                       : "N/A"}
                   </p>
                 </div>

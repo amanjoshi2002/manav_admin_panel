@@ -15,7 +15,7 @@ interface Product {
   subSubCategoryId: string;
   pricing: {
     mrp: number;
-    regular: number;
+    customer: number;
     reseller: number;
     special: number;
   };
