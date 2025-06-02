@@ -383,24 +383,34 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
   // Handle image file selection
   const handleImageFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImageFiles(Array.from(e.target.files));
+      const filesArr = Array.from(e.target.files);
+      setImageFiles(prev => [...prev, ...filesArr]);
     }
   };
 
-  // Remove a selected image file
-  const removeImageFile = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  // Remove a selected image file or URL
+  const removeImage = (index: number, isFile: boolean) => {
+    if (isFile) {
+      setImageFiles(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setFormData({
+        ...formData,
+        images: formData.images.filter((_, i) => i !== index)
+      });
+    }
   };
 
   // Handle color image file selection
   const handleColorImageFilesChange = (colorIdx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArr = Array.from(e.target.files);
+      // Merge new files with existing URLs for this color
       setColorImageFiles(prev => {
         const updated = [...prev];
-        updated[colorIdx] = filesArr;
+        updated[colorIdx] = (prev[colorIdx] || []).concat(filesArr);
         return updated;
       });
+      // Do NOT clear color.images (URLs) when uploading new files
     }
   };
 
@@ -410,6 +420,21 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       const updated = [...prev];
       updated[colorIdx] = updated[colorIdx].filter((_, i) => i !== fileIdx);
       return updated;
+    });
+  };
+
+  // Remove color image field (for URLs)
+  const removeColorImageUrl = (colorIndex: number, imageIndex: number) => {
+    const updatedColors = [...formData.colors];
+    const updatedImages = [...updatedColors[colorIndex].images];
+    updatedImages.splice(imageIndex, 1);
+    updatedColors[colorIndex] = {
+      ...updatedColors[colorIndex],
+      images: updatedImages
+    };
+    setFormData({
+      ...formData,
+      colors: updatedColors
     });
   };
 
@@ -454,12 +479,15 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       formPayload.append("stock", String(cleanedFormData.stock));
       formPayload.append("isActive", String(cleanedFormData.isActive));
       formPayload.append("sizes", JSON.stringify(cleanedFormData.sizes));
-      // Remove color images (urls) from color objects, backend will set them
-      const colorsWithoutImages = cleanedFormData.colors.map((c) => ({ ...c, images: [] }));
-      formPayload.append("colors", JSON.stringify(colorsWithoutImages));
+      // DO NOT clear color images (urls) from color objects
+      formPayload.append("colors", JSON.stringify(cleanedFormData.colors));
       formPayload.append("dynamicFields", JSON.stringify(cleanedFormData.dynamicFields || {}));
 
       // Main product images
+      // Always send both existing URLs and new files
+      cleanedFormData.images.forEach((img) => {
+        formPayload.append("images", img);
+      });
       imageFiles.forEach((file) => {
         formPayload.append("images", file);
       });
@@ -751,21 +779,20 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
               </button>
             </div>
             
-            {formData.colors.map((color, index) => (
-              <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+            {formData.colors.map((color, colorIdx) => (
+              <div key={colorIdx} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div className="flex justify-between items-start mb-4">
-                  <h4 className="text-sm font-medium">Color #{index + 1}</h4>
+                  <h4 className="text-sm font-medium">Color #{colorIdx + 1}</h4>
                   {formData.colors.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => removeColor(index)}
+                      onClick={() => removeColor(colorIdx)}
                       className="text-red-600 hover:text-red-800"
                     >
                       Remove
                     </button>
                   )}
                 </div>
-                
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
@@ -774,7 +801,7 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                     <input
                       type="text"
                       value={color.name}
-                      onChange={(e) => handleColorChange(index, 'name', e.target.value)}
+                      onChange={(e) => handleColorChange(colorIdx, 'name', e.target.value)}
                       placeholder="Red or #FF0000"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
                     />
@@ -787,61 +814,62 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                         Color Images (Upload)
                       </label>
                       <label
-                        htmlFor={`color-images-${index}`}
+                        htmlFor={`color-images-${colorIdx}`}
                         className="inline-block px-3 py-1 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700 text-xs"
                       >
-                        {colorImageFiles[index] && colorImageFiles[index].length > 0
+                        {colorImageFiles[colorIdx] && colorImageFiles[colorIdx].length > 0
                           ? "Change Images"
                           : "Choose Images"}
                       </label>
                       <input
-                        id={`color-images-${index}`}
+                        id={`color-images-${colorIdx}`}
                         type="file"
                         accept="image/*"
                         multiple
-                        onChange={e => handleColorImageFilesChange(index, e)}
+                        onChange={e => handleColorImageFilesChange(colorIdx, e)}
                         className="hidden"
                       />
                     </div>
 
-                    {/* Preview selected color images */}
-                    {colorImageFiles[index] && colorImageFiles[index].length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {colorImageFiles[index].map((file, fileIdx) => (
-                          <div key={fileIdx} className="relative">
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt={`Color ${index + 1} Preview ${fileIdx + 1}`}
-                              className="h-12 w-12 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeColorImageFile(index, fileIdx)}
-                              className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
-                              title="Remove"
-                            >
-                              &times;
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Show current images if editing and no new images selected */}
-                    {(!colorImageFiles[index] || colorImageFiles[index].length === 0) &&
-                      color.images &&
-                      color.images.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {color.images.map((img, imgIdx) => (
-                            <img
-                              key={imgIdx}
-                              src={img}
-                              alt={`Color ${index + 1} Image ${imgIdx + 1}`}
-                              className="h-12 w-12 object-cover rounded"
-                            />
-                          ))}
+                    {/* Show both existing color images (URLs) and new uploads */}
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {/* Existing color images from URLs */}
+                      {color.images && color.images.map((img, imgIdx) => (
+                        <div key={"existing-" + imgIdx} className="relative">
+                          <img
+                            src={img}
+                            alt={`Color ${colorIdx + 1} Image ${imgIdx + 1}`}
+                            className="h-12 w-12 object-cover rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeColorImageUrl(colorIdx, imgIdx)}
+                            className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                            title="Remove"
+                          >
+                            &times;
+                          </button>
                         </div>
-                      )}
+                      ))}
+                      {/* New color images from file uploads */}
+                      {colorImageFiles[colorIdx] && colorImageFiles[colorIdx].map((file, fileIdx) => (
+                        <div key={"file-" + fileIdx} className="relative">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Color ${colorIdx + 1} Upload ${fileIdx + 1}`}
+                            className="h-12 w-12 object-cover rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeColorImageFile(colorIdx, fileIdx)}
+                            className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                            title="Remove"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -867,41 +895,45 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             onChange={handleImageFilesChange}
             className="hidden"
           />
-          {/* Preview selected images */}
-          {imageFiles.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {imageFiles.map((file, idx) => (
-                <div key={idx} className="relative">
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`Preview ${idx + 1}`}
-                    className="h-16 w-16 object-cover rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImageFile(idx)}
-                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
-                    title="Remove"
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          {/* Show current images if editing and no new images selected */}
-          {imageFiles.length === 0 && formData.images && formData.images.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {formData.images.map((img, idx) => (
+          {/* Always show both existing and new images */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {/* Existing images from URLs */}
+            {formData.images && formData.images.map((img, idx) => (
+              <div key={"existing-" + idx} className="relative">
                 <img
-                  key={idx}
                   src={img}
                   alt={`Product ${idx + 1}`}
                   className="h-16 w-16 object-cover rounded"
                 />
-              ))}
-            </div>
-          )}
+                <button
+                  type="button"
+                  onClick={() => removeImage(idx, false)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                  title="Remove"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+            {/* New images from file uploads */}
+            {imageFiles.map((file, idx) => (
+              <div key={"file-" + idx} className="relative">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Preview ${idx + 1}`}
+                  className="h-16 w-16 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(idx, true)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full px-1 py-0.5 text-xs"
+                  title="Remove"
+                >
+                  &times;
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
         
         {/* Submit Buttons */}
