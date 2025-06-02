@@ -14,12 +14,12 @@ interface Product {
     name: string;
   };
   subSubCategoryId: string;
+  gst: number;
   pricing: {
     mrp: number;
     customer: number;
     reseller: number;
     special: number;
-    gst: number;
   };
   description?: string;
   colors: Array<{
@@ -217,11 +217,10 @@ export default function ProductDetailPage() {
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">GST</p>
                   <p className="font-medium">
-                    {product.pricing &&
-                    !isNaN(Number(product.pricing.gst)) &&
-                    product.pricing.gst !== null &&
-                    product.pricing.gst !== undefined
-                      ? `${product.pricing.gst}%`
+                    {!isNaN(Number(product.gst)) &&
+                    product.gst !== null &&
+                    product.gst !== undefined
+                      ? `${product.gst}%`
                       : "N/A"}
                   </p>
                 </div>

@@ -13,12 +13,12 @@ interface Product {
     name: string;
   };
   subSubCategoryId: string;
+  gst: number;
   pricing: {
     mrp: number;
     customer: number;
     reseller: number;
     special: number;
-    gst: number;
   };
   description?: string;
   colors: Array<{
