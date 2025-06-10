@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { authenticatedRequest } from "@/config/api";
 import { useRouter } from "next/navigation";
+import { useRef, useState, useEffect, MutableRefObject } from "react";
 
 interface SubCategory {
   _id: string;
@@ -116,6 +116,9 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
   const [colorImageFiles, setColorImageFiles] = useState<File[][]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Add refs for color fields
+  const colorRefs = useRef<Array<HTMLDivElement | null>>([]);
+
   // Fetch subcategories
   useEffect(() => {
     const fetchSubCategories = async () => {
@@ -195,6 +198,12 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
           colors: product.colors || [{ name: "", images: [] }],
           images: product.images || []
         });
+        // Sync colorImageFiles length with colors
+        setColorImageFiles(
+          Array((product.colors && product.colors.length) || 1)
+            .fill(null)
+            .map(() => [])
+        );
       } catch (err: any) {
         setError(err.message || "Failed to fetch product data");
       } finally {
@@ -280,13 +289,19 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     });
   };
 
-  // Add new color
+  // Add new color and scroll to it
   const addColor = () => {
-    setFormData({
-      ...formData,
-      colors: [...formData.colors, { name: "", images: [] }]
-    });
-    setColorImageFiles([...colorImageFiles, []]);
+    setFormData(prev => ({
+      ...prev,
+      colors: [...prev.colors, { name: "", images: [] }]
+    }));
+    setColorImageFiles(prev => [...prev, []]);
+    setTimeout(() => {
+      const idx = formData.colors.length; // new color index
+      if (colorRefs.current[idx]) {
+        colorRefs.current[idx].scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100); // wait for DOM update
   };
 
   // Remove color
@@ -751,7 +766,6 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         {/* Variants */}
         <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold">Variants</h2>
-          
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Sizes (comma separated)
@@ -764,8 +778,8 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
             />
           </div>
-          
           <div className="space-y-4">
+            {/* Add Color button at the top */}
             <div className="flex justify-between items-center">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Colors
@@ -778,9 +792,13 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                 Add Color
               </button>
             </div>
-            
+            {/* Color fields */}
             {formData.colors.map((color, colorIdx) => (
-              <div key={colorIdx} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div
+                key={colorIdx}
+                ref={el => { colorRefs.current[colorIdx] = el; }}
+                className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <h4 className="text-sm font-medium">Color #{colorIdx + 1}</h4>
                   {formData.colors.length > 1 && (
@@ -874,6 +892,16 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
                 </div>
               </div>
             ))}
+            {/* Add Color button at the bottom */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={addColor}
+                className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
+              >
+                Add Color
+              </button>
+            </div>
           </div>
         </div>
         
