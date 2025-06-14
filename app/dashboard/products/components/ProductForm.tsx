@@ -83,6 +83,9 @@ interface ProductFormData {
   images: string[];
   dynamicFields?: Record<string, any>;
   colorImageFiles?: File[][]; // Array of arrays, each for a color
+  showForCustomer: boolean;
+  showForReseller: boolean;
+  showForSpecial: boolean;
 }
 
 export default function ProductForm({ productId, isEditing = false }: ProductFormProps) {
@@ -108,7 +111,10 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     isActive: true,
     sizes: [],
     colors: [{ name: "", images: [] }],
-    images: []
+    images: [],
+    showForCustomer: true,
+    showForReseller: true,
+    showForSpecial: true
   });
 
   // Add state for image files
@@ -196,7 +202,10 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
           isActive: product.isActive,
           sizes: product.sizes || [],
           colors: product.colors || [{ name: "", images: [] }],
-          images: product.images || []
+          images: product.images || [],
+          showForCustomer: (product as any).showForCustomer ?? true,
+          showForReseller: (product as any).showForReseller ?? true,
+          showForSpecial: (product as any).showForSpecial ?? true
         });
         // Sync colorImageFiles length with colors
         setColorImageFiles(
@@ -497,6 +506,9 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       // DO NOT clear color images (urls) from color objects
       formPayload.append("colors", JSON.stringify(cleanedFormData.colors));
       formPayload.append("dynamicFields", JSON.stringify(cleanedFormData.dynamicFields || {}));
+      formPayload.append("showForCustomer", String(cleanedFormData.showForCustomer));
+      formPayload.append("showForReseller", String(cleanedFormData.showForReseller));
+      formPayload.append("showForSpecial", String(cleanedFormData.showForSpecial));
 
       // Main product images
       // Always send both existing URLs and new files
@@ -964,6 +976,43 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
           </div>
         </div>
         
+        {/* Visibility (Show For) */}
+        <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold">Visibility</h2>
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="showForCustomer"
+                checked={formData.showForCustomer}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Customer</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="showForReseller"
+                checked={formData.showForReseller}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Reseller</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="showForSpecial"
+                checked={formData.showForSpecial}
+                onChange={handleCheckboxChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Special</span>
+            </label>
+          </div>
+        </div>
+
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
