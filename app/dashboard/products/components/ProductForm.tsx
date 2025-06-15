@@ -71,10 +71,17 @@ interface ProductFormData {
     mrp: number;
     customer: number;
     reseller: number;
+    reseller1: number;
+    reseller2: number;
+    reseller3: number;
+    reseller4: number;
+    reseller5: number;
+    reseller6: number;
     special: number;
   };
   stock: number;
   isActive: boolean;
+  isAvailable: boolean; // Add this field
   sizes: string[];
   colors: Array<{
     name: string;
@@ -85,7 +92,14 @@ interface ProductFormData {
   colorImageFiles?: File[][]; // Array of arrays, each for a color
   showForCustomer: boolean;
   showForReseller: boolean;
+  showForReseller1: boolean;
+  showForReseller2: boolean;
+  showForReseller3: boolean;
+  showForReseller4: boolean;
+  showForReseller5: boolean;
+  showForReseller6: boolean;
   showForSpecial: boolean;
+  useIndividualResellerPricing: boolean; // New field to toggle pricing mode
 }
 
 export default function ProductForm({ productId, isEditing = false }: ProductFormProps) {
@@ -105,16 +119,30 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       mrp: 0,
       customer: 0,
       reseller: 0,
+      reseller1: 0,
+      reseller2: 0,
+      reseller3: 0,
+      reseller4: 0,
+      reseller5: 0,
+      reseller6: 0,
       special: 0
     },
     stock: 0,
     isActive: true,
+    isAvailable: true, // Add this
     sizes: [],
     colors: [{ name: "", images: [] }],
     images: [],
     showForCustomer: true,
     showForReseller: true,
-    showForSpecial: true
+    showForReseller1: true,
+    showForReseller2: true,
+    showForReseller3: true,
+    showForReseller4: true,
+    showForReseller5: true,
+    showForReseller6: true,
+    showForSpecial: true,
+    useIndividualResellerPricing: false
   });
 
   // Add state for image files
@@ -196,16 +224,35 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             mrp: product.pricing?.mrp || 0,
             customer: product.pricing?.customer || 0,
             reseller: product.pricing?.reseller || 0,
+            reseller1: (product.pricing as any)?.reseller1 || 0,
+            reseller2: (product.pricing as any)?.reseller2 || 0,
+            reseller3: (product.pricing as any)?.reseller3 || 0,
+            reseller4: (product.pricing as any)?.reseller4 || 0,
+            reseller5: (product.pricing as any)?.reseller5 || 0,
+            reseller6: (product.pricing as any)?.reseller6 || 0,
             special: product.pricing?.special || 0
           },
           stock: product.stock || 0,
           isActive: product.isActive,
+          isAvailable: (product as any).isAvailable ?? true, // Add this
           sizes: product.sizes || [],
           colors: product.colors || [{ name: "", images: [] }],
           images: product.images || [],
           showForCustomer: (product as any).showForCustomer ?? true,
           showForReseller: (product as any).showForReseller ?? true,
-          showForSpecial: (product as any).showForSpecial ?? true
+          showForReseller1: (product as any).showForReseller1 ?? true,
+          showForReseller2: (product as any).showForReseller2 ?? true,
+          showForReseller3: (product as any).showForReseller3 ?? true,
+          showForReseller4: (product as any).showForReseller4 ?? true,
+          showForReseller5: (product as any).showForReseller5 ?? true,
+          showForReseller6: (product as any).showForReseller6 ?? true,
+          showForSpecial: (product as any).showForSpecial ?? true,
+          useIndividualResellerPricing: (product.pricing as any)?.reseller1 !== (product.pricing as any)?.reseller ||
+                                      (product.pricing as any)?.reseller2 !== (product.pricing as any)?.reseller ||
+                                      (product.pricing as any)?.reseller3 !== (product.pricing as any)?.reseller ||
+                                      (product.pricing as any)?.reseller4 !== (product.pricing as any)?.reseller ||
+                                      (product.pricing as any)?.reseller5 !== (product.pricing as any)?.reseller ||
+                                      (product.pricing as any)?.reseller6 !== (product.pricing as any)?.reseller
         });
         // Sync colorImageFiles length with colors
         setColorImageFiles(
@@ -469,11 +516,17 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     setError("");
 
     // Validate pricing fields
-    const { mrp, customer, reseller, special } = formData.pricing;
+    const { mrp, customer, reseller, reseller1, reseller2, reseller3, reseller4, reseller5, reseller6, special } = formData.pricing;
     if (
       isNaN(mrp) || mrp <= 0 ||
       isNaN(customer) || customer <= 0 ||
       isNaN(reseller) || reseller <= 0 ||
+      isNaN(reseller1) || reseller1 <= 0 ||
+      isNaN(reseller2) || reseller2 <= 0 ||
+      isNaN(reseller3) || reseller3 <= 0 ||
+      isNaN(reseller4) || reseller4 <= 0 ||
+      isNaN(reseller5) || reseller5 <= 0 ||
+      isNaN(reseller6) || reseller6 <= 0 ||
       isNaN(special) || special <= 0 ||
       isNaN(formData.gst) || formData.gst < 0
     ) {
@@ -502,12 +555,19 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
       formPayload.append("pricing", JSON.stringify(cleanedFormData.pricing));
       formPayload.append("stock", String(cleanedFormData.stock));
       formPayload.append("isActive", String(cleanedFormData.isActive));
+      formPayload.append("isAvailable", String(cleanedFormData.isAvailable)); // Add this
       formPayload.append("sizes", JSON.stringify(cleanedFormData.sizes));
       // DO NOT clear color images (urls) from color objects
       formPayload.append("colors", JSON.stringify(cleanedFormData.colors));
       formPayload.append("dynamicFields", JSON.stringify(cleanedFormData.dynamicFields || {}));
       formPayload.append("showForCustomer", String(cleanedFormData.showForCustomer));
       formPayload.append("showForReseller", String(cleanedFormData.showForReseller));
+      formPayload.append("showForReseller1", String(cleanedFormData.showForReseller1));
+      formPayload.append("showForReseller2", String(cleanedFormData.showForReseller2));
+      formPayload.append("showForReseller3", String(cleanedFormData.showForReseller3));
+      formPayload.append("showForReseller4", String(cleanedFormData.showForReseller4));
+      formPayload.append("showForReseller5", String(cleanedFormData.showForReseller5));
+      formPayload.append("showForReseller6", String(cleanedFormData.showForReseller6));
       formPayload.append("showForSpecial", String(cleanedFormData.showForSpecial));
 
       // Main product images
@@ -550,6 +610,51 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle reseller pricing toggle
+  const handleResellerPricingToggle = (useIndividual: boolean) => {
+    setFormData(prev => {
+      const updatedPricing = { ...prev.pricing };
+      
+      if (!useIndividual) {
+        // If switching to unified pricing, set all reseller prices to main reseller price
+        updatedPricing.reseller1 = prev.pricing.reseller;
+        updatedPricing.reseller2 = prev.pricing.reseller;
+        updatedPricing.reseller3 = prev.pricing.reseller;
+        updatedPricing.reseller4 = prev.pricing.reseller;
+        updatedPricing.reseller5 = prev.pricing.reseller;
+        updatedPricing.reseller6 = prev.pricing.reseller;
+      }
+      
+      return {
+        ...prev,
+        useIndividualResellerPricing: useIndividual,
+        pricing: updatedPricing
+      };
+    });
+  };
+
+  // Handle main reseller price change (update all if unified pricing)
+  const handleMainResellerPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const num = value === "" ? 0 : parseFloat(value);
+    
+    setFormData(prev => {
+      const updatedPricing = { ...prev.pricing, reseller: num };
+      
+      // If using unified pricing, update all reseller prices
+      if (!prev.useIndividualResellerPricing) {
+        updatedPricing.reseller1 = num;
+        updatedPricing.reseller2 = num;
+        updatedPricing.reseller3 = num;
+        updatedPricing.reseller4 = num;
+        updatedPricing.reseller5 = num;
+        updatedPricing.reseller6 = num;
+      }
+      
+      return { ...prev, pricing: updatedPricing };
+    });
   };
 
   return (
@@ -674,7 +779,40 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold">Pricing</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Reseller Pricing Mode Toggle */}
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              Reseller Pricing Mode
+            </label>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="resellerPricingMode"
+                  checked={!formData.useIndividualResellerPricing}
+                  onChange={() => handleResellerPricingToggle(false)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Same price for all resellers (Reseller1-6 will use main Reseller price)
+                </span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="resellerPricingMode"
+                  checked={formData.useIndividualResellerPricing}
+                  onChange={() => handleResellerPricingToggle(true)}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Individual prices for each reseller type
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 MRP *
@@ -693,7 +831,7 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                customer Price *
+                Customer Price *
               </label>
               <input
                 type="number"
@@ -709,34 +847,146 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
             
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Reseller Price
+                Reseller Price * {!formData.useIndividualResellerPricing && <span className="text-xs text-blue-600">(Applied to all resellers)</span>}
               </label>
               <input
                 type="number"
                 name="pricing.reseller"
                 value={formData.pricing.reseller}
-                onChange={handleNumberChange}
+                onChange={handleMainResellerPriceChange}
+                required
                 min="0"
                 step="0.01"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
               />
             </div>
             
+            {/* Individual Reseller Prices - Only show if individual pricing is enabled */}
+            {formData.useIndividualResellerPricing && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller1 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller1"
+                    value={formData.pricing.reseller1}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller2 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller2"
+                    value={formData.pricing.reseller2}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller3 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller3"
+                    value={formData.pricing.reseller3}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller4 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller4"
+                    value={formData.pricing.reseller4}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller5 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller5"
+                    value={formData.pricing.reseller5}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Reseller6 Price *
+                  </label>
+                  <input
+                    type="number"
+                    name="pricing.reseller6"
+                    value={formData.pricing.reseller6}
+                    onChange={handleNumberChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
+                  />
+                </div>
+              </>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Special Price
+                Special Price *
               </label>
               <input
                 type="number"
                 name="pricing.special"
                 value={formData.pricing.special}
                 onChange={handleNumberChange}
+                required
                 min="0"
                 step="0.01"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700"
               />
             </div>
           </div>
+          
+          {/* Show current pricing summary */}
+          {!formData.useIndividualResellerPricing && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                <strong>Note:</strong> All reseller types (Reseller1-6) will use the main Reseller price: ₹{formData.pricing.reseller}
+              </p>
+            </div>
+          )}
         </div>
         
         {/* Inventory */}
@@ -759,18 +1009,39 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
               />
             </div>
             
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isActive"
-                name="isActive"
-                checked={formData.isActive}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                Active (available for purchase)
-              </label>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  name="isActive"
+                  checked={formData.isActive}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Active (visible to users)
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isAvailable"
+                  name="isAvailable"
+                  checked={formData.isAvailable}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Available (can be purchased)
+                </label>
+              </div>
+              
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <p><strong>Active:</strong> If unchecked, product is hidden from users but visible to admin</p>
+                <p><strong>Available:</strong> If unchecked, product is shown but marked as unavailable</p>
+              </div>
             </div>
           </div>
         </div>
@@ -979,37 +1250,73 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
         {/* Visibility (Show For) */}
         <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold">Visibility</h2>
-          <div className="flex flex-wrap gap-6">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="showForCustomer"
-                checked={formData.showForCustomer}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Customer</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="showForReseller"
-                checked={formData.showForReseller}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Reseller</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="showForSpecial"
-                checked={formData.showForSpecial}
-                onChange={handleCheckboxChange}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">Show for Special</span>
-            </label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/*
+              - showForCustomer
+              - showForReseller
+              - showForReseller1
+              - showForReseller2
+              - showForReseller3
+              - showForReseller4
+              - showForReseller5
+              - showForReseller6
+              - showForSpecial
+            */}
+            {/*
+              // Using a loop to generate the checkboxes
+              // This approach is cleaner and more maintainable
+            */}
+            {/*
+              // Define an array of visibility keys and labels
+              const visibilityOptions = [
+                { key: 'showForCustomer', label: 'Show for Customer' },
+                { key: 'showForReseller', label: 'Show for Reseller' },
+                { key: 'showForReseller1', label: 'Show for Reseller1' },
+                { key: 'showForReseller2', label: 'Show for Reseller2' },
+                { key: 'showForReseller3', label: 'Show for Reseller3' },
+                { key: 'showForReseller4', label: 'Show for Reseller4' },
+                { key: 'showForReseller5', label: 'Show for Reseller5' },
+                { key: 'showForReseller6', label: 'Show for Reseller6' },
+                { key: 'showForSpecial', label: 'Show for Special' }
+              ];
+            */}
+            {/*
+              // Map over the visibilityOptions array to create the checkboxes
+              visibilityOptions.map(({ key, label }) => (
+                <label key={key} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name={key}
+                    checked={(formData as any)[key]}
+                    onChange={handleCheckboxChange}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                </label>
+              ))
+            */}
+            { [
+              { key: 'showForCustomer', label: 'Show for Customer' },
+              { key: 'showForReseller', label: 'Show for Reseller' },
+              { key: 'showForReseller1', label: 'Show for Reseller1' },
+              { key: 'showForReseller2', label: 'Show for Reseller2' },
+              { key: 'showForReseller3', label: 'Show for Reseller3' },
+              { key: 'showForReseller4', label: 'Show for Reseller4' },
+              { key: 'showForReseller5', label: 'Show for Reseller5' },
+              { key: 'showForReseller6', label: 'Show for Reseller6' },
+              { key: 'showForSpecial', label: 'Show for Special' }
+            ].map(({ key, label }) => (
+              <label key={key} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name={key}
+                  checked={(formData as any)[key]}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+              </label>
+            ))}
           </div>
         </div>
 

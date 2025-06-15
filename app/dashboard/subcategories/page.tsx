@@ -19,6 +19,15 @@ interface SubSubCategory {
   image?: string;
   attributes: Attribute[];
   isActive: boolean;
+  showForCustomer: boolean;
+  showForReseller: boolean;
+  showForReseller1: boolean;
+  showForReseller2: boolean;
+  showForReseller3: boolean;
+  showForReseller4: boolean;
+  showForReseller5: boolean;
+  showForReseller6: boolean;
+  showForSpecial: boolean;
 }
 
 interface SubCategory {
@@ -30,6 +39,15 @@ interface SubCategory {
   commonAttributes: Attribute[];
   subCategories: SubSubCategory[];
   isActive: boolean;
+  showForCustomer: boolean;
+  showForReseller: boolean;
+  showForReseller1: boolean;
+  showForReseller2: boolean;
+  showForReseller3: boolean;
+  showForReseller4: boolean;
+  showForReseller5: boolean;
+  showForReseller6: boolean;
+  showForSpecial: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,7 +80,16 @@ export default function SubcategoriesPage() {
     description: '',
     image: '',
     attributes: [],
-    isActive: true
+    isActive: true,
+    showForCustomer: true,
+    showForReseller: true,
+    showForReseller1: true,
+    showForReseller2: true,
+    showForReseller3: true,
+    showForReseller4: true,
+    showForReseller5: true,
+    showForReseller6: true,
+    showForSpecial: true
   });
   
   // New subcategory form state
@@ -73,7 +100,16 @@ export default function SubcategoriesPage() {
     image: '',
     commonAttributes: [],
     subCategories: [],
-    isActive: true
+    isActive: true,
+    showForCustomer: true,
+    showForReseller: true,
+    showForReseller1: true,
+    showForReseller2: true,
+    showForReseller3: true,
+    showForReseller4: true,
+    showForReseller5: true,
+    showForReseller6: true,
+    showForSpecial: true
   });
 
   // Category states
@@ -140,6 +176,15 @@ export default function SubcategoriesPage() {
       formData.append("category", newSubcategory.category || "");
       formData.append("description", newSubcategory.description || "");
       formData.append("isActive", String(newSubcategory.isActive));
+      formData.append("showForCustomer", String(newSubcategory.showForCustomer));
+      formData.append("showForReseller", String(newSubcategory.showForReseller));
+      formData.append("showForReseller1", String(newSubcategory.showForReseller1));
+      formData.append("showForReseller2", String(newSubcategory.showForReseller2));
+      formData.append("showForReseller3", String(newSubcategory.showForReseller3));
+      formData.append("showForReseller4", String(newSubcategory.showForReseller4));
+      formData.append("showForReseller5", String(newSubcategory.showForReseller5));
+      formData.append("showForReseller6", String(newSubcategory.showForReseller6));
+      formData.append("showForSpecial", String(newSubcategory.showForSpecial));
       if (subcategoryImage) formData.append("image", subcategoryImage);
 
       const endpoint = formMode === "create"
@@ -165,7 +210,16 @@ export default function SubcategoriesPage() {
         image: '',
         commonAttributes: [],
         subCategories: [],
-        isActive: true
+        isActive: true,
+        showForCustomer: true,
+        showForReseller: true,
+        showForReseller1: true,
+        showForReseller2: true,
+        showForReseller3: true,
+        showForReseller4: true,
+        showForReseller5: true,
+        showForReseller6: true,
+        showForSpecial: true
       });
       setSubcategoryImage(null);
       fetchSubcategories();
@@ -184,6 +238,15 @@ export default function SubcategoriesPage() {
       formData.append("name", newSubSubcategory.name || "");
       formData.append("description", newSubSubcategory.description || "");
       formData.append("isActive", String(newSubSubcategory.isActive));
+      formData.append("showForCustomer", String(newSubSubcategory.showForCustomer));
+      formData.append("showForReseller", String(newSubSubcategory.showForReseller));
+      formData.append("showForReseller1", String(newSubSubcategory.showForReseller1));
+      formData.append("showForReseller2", String(newSubSubcategory.showForReseller2));
+      formData.append("showForReseller3", String(newSubSubcategory.showForReseller3));
+      formData.append("showForReseller4", String(newSubSubcategory.showForReseller4));
+      formData.append("showForReseller5", String(newSubSubcategory.showForReseller5));
+      formData.append("showForReseller6", String(newSubSubcategory.showForReseller6));
+      formData.append("showForSpecial", String(newSubSubcategory.showForSpecial));
       if (subSubcategoryImage) formData.append("image", subSubcategoryImage);
 
       let endpoint = "";
@@ -213,7 +276,16 @@ export default function SubcategoriesPage() {
         description: '',
         image: '',
         attributes: [],
-        isActive: true
+        isActive: true,
+        showForCustomer: true,
+        showForReseller: true,
+        showForReseller1: true,
+        showForReseller2: true,
+        showForReseller3: true,
+        showForReseller4: true,
+        showForReseller5: true,
+        showForReseller6: true,
+        showForSpecial: true
       });
       setSubSubcategoryImage(null);
       fetchSubcategories();
@@ -232,7 +304,16 @@ export default function SubcategoriesPage() {
       description: '',
       image: '',
       attributes: [],
-      isActive: true
+      isActive: true,
+      showForCustomer: true,
+      showForReseller: true,
+      showForReseller1: true,
+      showForReseller2: true,
+      showForReseller3: true,
+      showForReseller4: true,
+      showForReseller5: true,
+      showForReseller6: true,
+      showForSpecial: true
     });
     setShowSubSubForm(true);
   };
@@ -333,7 +414,16 @@ export default function SubcategoriesPage() {
                 image: '',
                 commonAttributes: [],
                 subCategories: [],
-                isActive: true
+                isActive: true,
+                showForCustomer: true,
+                showForReseller: true,
+                showForReseller1: true,
+                showForReseller2: true,
+                showForReseller3: true,
+                showForReseller4: true,
+                showForReseller5: true,
+                showForReseller6: true,
+                showForSpecial: true
               });
             }}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -478,6 +568,41 @@ export default function SubcategoriesPage() {
               </span>
             </div>
             
+            {/* Visibility Controls */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Visibility Controls
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { key: 'showForCustomer', label: 'Customer' },
+                  { key: 'showForReseller', label: 'Reseller' },
+                  { key: 'showForReseller1', label: 'Reseller1' },
+                  { key: 'showForReseller2', label: 'Reseller2' },
+                  { key: 'showForReseller3', label: 'Reseller3' },
+                  { key: 'showForReseller4', label: 'Reseller4' },
+                  { key: 'showForReseller5', label: 'Reseller5' },
+                  { key: 'showForReseller6', label: 'Reseller6' },
+                  { key: 'showForSpecial', label: 'Special' }
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={!!(newSubcategory as any)[key]}
+                      onChange={e =>
+                        setNewSubcategory({
+                          ...newSubcategory,
+                          [key]: e.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -564,6 +689,41 @@ export default function SubcategoriesPage() {
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                   {newSubSubcategory.isActive ? "Active" : "Inactive"}
                 </span>
+              </div>
+              
+              {/* Visibility Controls for Sub-subcategory */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Visibility Controls
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { key: 'showForCustomer', label: 'Customer' },
+                    { key: 'showForReseller', label: 'Reseller' },
+                    { key: 'showForReseller1', label: 'Reseller1' },
+                    { key: 'showForReseller2', label: 'Reseller2' },
+                    { key: 'showForReseller3', label: 'Reseller3' },
+                    { key: 'showForReseller4', label: 'Reseller4' },
+                    { key: 'showForReseller5', label: 'Reseller5' },
+                    { key: 'showForReseller6', label: 'Reseller6' },
+                    { key: 'showForSpecial', label: 'Special' }
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={!!(newSubSubcategory as any)[key]}
+                        onChange={e =>
+                          setNewSubSubcategory({
+                            ...newSubSubcategory,
+                            [key]: e.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">

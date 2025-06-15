@@ -164,7 +164,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${user.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' : 
-                      user.role === 'reseller' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                      user.role === 'reseller' || user.role.startsWith('reseller') ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
                       user.role === 'special' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 
                       user.role === 'customer' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
                       'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}
@@ -220,6 +220,12 @@ export default function UsersPage() {
                 <option value="">Select a role</option>
                 <option value="customer">Customer</option>
                 <option value="reseller">Reseller</option>
+                <option value="reseller1">Reseller1</option>
+                <option value="reseller2">Reseller2</option>
+                <option value="reseller3">Reseller3</option>
+                <option value="reseller4">Reseller4</option>
+                <option value="reseller5">Reseller5</option>
+                <option value="reseller6">Reseller6</option>
                 <option value="special">Special</option>
                 <option value="admin">Admin</option>
               </select>
