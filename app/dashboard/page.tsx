@@ -81,6 +81,14 @@ export default function Dashboard() {
             </div>
           </Link>
           
+          {/* Policy Management Section */}
+          <Link href="/dashboard/policies" className="block">
+            <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-100 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-800/30 transition-colors">
+              <h4 className="font-bold">Policy Management</h4>
+              <p className="text-sm mt-2">Create, edit, and delete policies</p>
+            </div>
+          </Link>
+
           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
             <h4 className="font-bold">System Settings</h4>
             <p className="text-sm mt-2">Configure system settings and preferences</p>
