@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { authenticatedRequest } from "@/config/api";
+import Image from "next/image";
 
 interface Notification {
   _id: string;
@@ -71,8 +72,6 @@ export default function NotificationsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      let formData: FormData | undefined;
-      let headers: any = {};
       let url = "/notifications";
       let method = "POST";
       if (editing) {
@@ -80,7 +79,7 @@ export default function NotificationsPage() {
         method = "PUT";
       }
 
-      formData = new FormData();
+      const formData = new FormData();
       formData.append("title", form.title);
       formData.append("message", form.message);
       formData.append("startDate", form.startDate);
@@ -183,7 +182,17 @@ export default function NotificationsPage() {
                 <div className="font-bold text-gray-900 dark:text-gray-100">{notification.title}</div>
                 <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{notification.message}</div>
                 {notification.image && (
-                  <img src={notification.image} alt="Notification" className="mt-2 max-h-32 rounded" />
+                  <div className="mt-2 max-h-32 rounded relative w-full" style={{ maxWidth: 200, height: 128 }}>
+                    <Image
+                      src={notification.image}
+                      alt="Notification"
+                      fill
+                      style={{ objectFit: "contain" }}
+                      className="rounded"
+                      sizes="200px"
+                      priority={false}
+                    />
+                  </div>
                 )}
                 <div className="text-xs text-gray-500 mt-2">
                   {notification.startDate && (
