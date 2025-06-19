@@ -89,6 +89,14 @@ export default function Dashboard() {
             </div>
           </Link>
 
+          {/* Notification Management Section */}
+          <Link href="/dashboard/notifications" className="block">
+            <div className="bg-cyan-50 dark:bg-cyan-900/20 p-4 rounded-lg border border-cyan-100 dark:border-cyan-800 hover:bg-cyan-100 dark:hover:bg-cyan-800/30 transition-colors">
+              <h4 className="font-bold">Notification Management</h4>
+              <p className="text-sm mt-2">Create, edit, and delete notifications</p>
+            </div>
+          </Link>
+
           <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
             <h4 className="font-bold">System Settings</h4>
             <p className="text-sm mt-2">Configure system settings and preferences</p>
