@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import { authenticatedRequest } from "@/config/api";
-import Image from "next/image";
 
 interface Notification {
   _id: string;
@@ -183,14 +182,13 @@ export default function NotificationsPage() {
                 <div className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{notification.message}</div>
                 {notification.image && (
                   <div className="mt-2 max-h-32 rounded relative w-full" style={{ maxWidth: 200, height: 128 }}>
-                    <Image
+                    <img
                       src={notification.image}
                       alt="Notification"
-                      fill
-                      style={{ objectFit: "contain" }}
-                      className="rounded"
-                      sizes="200px"
-                      priority={false}
+                      style={{ objectFit: "contain", width: "100%", height: "100%", borderRadius: "0.5rem" }}
+                      width={200}
+                      height={128}
+                      loading="lazy"
                     />
                   </div>
                 )}
@@ -224,3 +222,4 @@ export default function NotificationsPage() {
     </div>
   );
 }
+  
