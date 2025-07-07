@@ -1,0 +1,50 @@
+name: Deploy frontend2 (Next.js) to Lightsail
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.14.0'  # Adjust if needed
+
+    - name: Install SSH Client
+      run: sudo apt-get install openssh-client -y
+
+    - name: Add SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      shell: bash
+
+    - name: Start ssh-agent and add key
+      run: |
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/id_ed25519
+
+    - name: Deploy frontend2 via SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+          set -e
+          cd ~/manav_admin_panel || exit 1
+          git pull origin master || exit 1
+          npm install || exit 1
+          npm run build || exit 1
+          pm2 restart frontend2 || pm2 start npm --name frontend2 -- start
+        EOF
+
+    - name: Clean up SSH Key
+      run: rm -f ~/.ssh/id_ed25519
+      if: always()

@@ -39,7 +39,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           <Link href="/dashboard/users" className="block">
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-colors">
-              <h4 className="font-bold">User Management</h4>
+              <h4 className="font-bold">Userrrrr Management</h4>
               <p className="text-sm mt-2">Manage user accounts, roles and permissions</p>
             </div>
           </Link>
