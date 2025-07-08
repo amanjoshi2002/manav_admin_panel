@@ -52,7 +52,6 @@ export interface Product {
   sizes?: string[];
   dynamicFields?: Record<string, any>;
   images?: string[];
-  stock: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -96,7 +95,6 @@ export interface ProductFormData {
     reseller6: number;
     special: number;
   };
-  stock: number;
   isActive: boolean;
   isAvailable: boolean;
   sizes: string[];

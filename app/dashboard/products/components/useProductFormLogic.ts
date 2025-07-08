@@ -16,7 +16,6 @@ export function useProductFormLogic(productId?: string, isEditing: boolean = fal
     pricing: {
       mrp: 0, customer: 0, reseller: 0, reseller1: 0, reseller2: 0, reseller3: 0, reseller4: 0, reseller5: 0, reseller6: 0, special: 0
     },
-    stock: 0,
     isActive: true,
     isAvailable: true,
     sizes: [],
@@ -101,7 +100,6 @@ export function useProductFormLogic(productId?: string, isEditing: boolean = fal
             reseller6: (product.pricing as any)?.reseller6 || 0,
             special: product.pricing?.special || 0
           },
-          stock: product.stock || 0,
           isActive: product.isActive,
           isAvailable: (product as any).isAvailable ?? true,
           sizes: product.sizes || [],

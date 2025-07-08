@@ -237,6 +237,24 @@ export function useProductFormHandlers(
     });
   }, [formData, setFormData]);
 
+  const handleMainResellerPriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const num = value === "" ? 0 : parseFloat(value);
+    setFormData(prev => {
+      const updatedPricing = { ...prev.pricing, reseller: num };
+      // If using unified pricing, update all reseller prices
+      if (!prev.useIndividualResellerPricing) {
+        updatedPricing.reseller1 = num;
+        updatedPricing.reseller2 = num;
+        updatedPricing.reseller3 = num;
+        updatedPricing.reseller4 = num;
+        updatedPricing.reseller5 = num;
+        updatedPricing.reseller6 = num;
+      }
+      return { ...prev, pricing: updatedPricing };
+    });
+  }, [setFormData]);
+
   return {
     handleInputChange,
     handleCheckboxChange,
@@ -256,6 +274,7 @@ export function useProductFormHandlers(
     handleColorImageFilesChange,
     removeColorImageFile,
     removeColorImageUrl,
+    handleMainResellerPriceChange,
     // ...other handlers
   };
 }

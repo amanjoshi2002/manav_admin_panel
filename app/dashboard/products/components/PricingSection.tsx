@@ -61,41 +61,41 @@ const PricingSection: React.FC<PricingSectionProps> = ({
         </p>
       )}
     </div>
+    {/* Reseller Pricing Mode Toggle - always visible */}
+    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        Reseller Pricing Mode
+      </label>
+      <div className="space-y-2">
+        <label className="flex items-center space-x-2">
+          <input
+            type="radio"
+            name="resellerPricingMode"
+            checked={!formData.useIndividualResellerPricing}
+            onChange={() => handleResellerPricingToggle(false)}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            Same price for all resellers (Reseller1-6 will use main Reseller price)
+          </span>
+        </label>
+        <label className="flex items-center space-x-2">
+          <input
+            type="radio"
+            name="resellerPricingMode"
+            checked={formData.useIndividualResellerPricing}
+            onChange={() => handleResellerPricingToggle(true)}
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">
+            Individual prices for each reseller type
+          </span>
+        </label>
+      </div>
+    </div>
     {/* Common Pricing Section */}
     {formData.pricingMode === 'common' && (
       <>
-        {/* Reseller Pricing Mode Toggle */}
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Reseller Pricing Mode
-          </label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="resellerPricingMode"
-                checked={!formData.useIndividualResellerPricing}
-                onChange={() => handleResellerPricingToggle(false)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                Same price for all resellers (Reseller1-6 will use main Reseller price)
-              </span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="radio"
-                name="resellerPricingMode"
-                checked={formData.useIndividualResellerPricing}
-                onChange={() => handleResellerPricingToggle(true)}
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                Individual prices for each reseller type
-              </span>
-            </label>
-          </div>
-        </div>
         {/* Common Pricing Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>

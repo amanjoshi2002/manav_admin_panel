@@ -102,7 +102,6 @@ export default function ProductForm({ productId, isEditing = false }: ProductFor
 
       // FIX: Always stringify objects/arrays
       formPayload.append("pricing", JSON.stringify(cleanedFormData.pricing));
-      formPayload.append("stock", String(cleanedFormData.stock));
       formPayload.append("isActive", String(cleanedFormData.isActive));
       formPayload.append("isAvailable", String(cleanedFormData.isAvailable)); // Add this
       formPayload.append("sizes", JSON.stringify(cleanedFormData.sizes));
